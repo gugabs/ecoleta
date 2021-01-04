@@ -1,5 +1,7 @@
 # :recycle: Ecoleta
+<p align="justify">
 <b>Ecoleta</b> é uma aplicação desenvolvida durante a Next Level Week (1.0) da <b>Rocketseat</b> utilizando as tecnologias TypeScript, NodeJS e React.
+</p>
 
 # :rocket: Objetivo
 <p align="justify">
