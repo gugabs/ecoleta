@@ -2,6 +2,8 @@
 <img src="https://github.com/gugabs/ecoleta/blob/main/web/src/assets/img/home-background.svg" width="450px">
 </p>
 
+<hr>
+
 # :recycle: Ecoleta
 <p align="justify">
 <b>Ecoleta</b> é uma aplicação desenvolvida durante a Next Level Week (1.0) da <b>Rocketseat</b> utilizando as tecnologias TypeScript, NodeJS e React.
