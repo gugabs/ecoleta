@@ -12,8 +12,8 @@ import ecoletaLogo from "../../assets/img/logo.svg";
 
 import Dropzone from "../../components/Dropzone";
 
-import { LeafletMouseEvent } from "leaflet";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import Leaflet from "../../components/Leaflet";
+import MarkerLocation from "../../components/Leaflet";
 
 const CreatePoint = () => {
 
@@ -32,7 +32,7 @@ const CreatePoint = () => {
         const state = selectedState;
         const city = selectedCity;
 
-        const coordinates = mapPosition;
+        const coordinates = selectedLocation;
 
         const items = selectedItems;
 
@@ -43,8 +43,8 @@ const CreatePoint = () => {
         data.append("whatsapp", whatsapp);
         data.append("state", state);
         data.append("city", city);
-        data.append("latitude", String(coordinates?.lat));
-        data.append("longitude", String(coordinates?.lng));
+        data.append("latitude", String(coordinates.coords.lat));
+        data.append("longitude", String(coordinates.coords.lng));
         data.append("items", items.join(','));
 
         if(uploadedImage)
@@ -150,75 +150,18 @@ const CreatePoint = () => {
 
     }
 
-    const [mapCenter, setMapCenter] = useState<[number, number]>([0, 0]);
+    interface SelectedLocation {
 
-    useEffect(() => {
+        coords: {
 
-        navigator.geolocation.getCurrentPosition(centerPosition => {
+            lat: number;
+            lng: number;
 
-            const {
-                latitude,
-                longitude
-            } = centerPosition.coords;
-
-            setMapCenter([latitude, longitude]);
-
-        });
-
-    }, []);
-
-    function Map() {
-
-        return (
-
-            <MapContainer center={ mapCenter } zoom={ 12 } >
-                <TileLayer 
-                    attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-
-                <MarkerLocation />
-            </MapContainer>
-
-        );
+        }
 
     }
 
-    interface MarkerPosition {
-
-        lat: number;
-        lng: number;
-
-    }
-
-    const [mapPosition, setMapPosition] = useState<MarkerPosition | null>(null);
-
-    function MarkerLocation() {
-
-        useMapEvents({
-
-            click(event: LeafletMouseEvent) {
-
-                const position = {
-
-                    lat: event.latlng.lat,
-                    lng: event.latlng.lng
-
-                }
-
-                setMapPosition(position);
-
-            }
-
-        });
-
-        return mapPosition === null ? null : (
-
-            <Marker position={mapPosition} />
-
-        );
-
-    }
+    const [selectedLocation, setSelectedLocation] = useState<SelectedLocation>({ coords: { lat: 0, lng: 0 } });
 
     interface Item {
 
@@ -356,9 +299,7 @@ const CreatePoint = () => {
                         </div>
                     </div>
 
-                    <div className="mapContainer">
-                        <Map />
-                    </div>
+                    <Leaflet onLocationSelect={ setSelectedLocation } />
                 </fieldset>
 
                 <fieldset>
