@@ -10,39 +10,36 @@ import ecoletaLogo from "../../assets/img/logo.svg";
 import ecoletaBackground from "../../assets/img/home-background.svg";
 
 const Home = () => {
+  return (
+    <div id="page-home">
+      <div className="content">
+        <header>
+          <img src={ecoletaLogo} alt="Logotipo Ecoleta" />
+        </header>
 
-    return (
+        <main>
+          <div id="infs">
+            <h1>Sua plataforma de coleta de resíduos</h1>
+            <p>
+              Ajudamos as pessoas a encontrarem pontos de coleta de forma
+              eficiente.
+            </p>
 
-        <div id="page-home">
-            <div className="content">
-                <header>
-                    <img src={ ecoletaLogo } alt="Logotipo Ecoleta"/>
-                </header>
+            <Link to="/create-point">
+              <span>
+                <FiLogIn />
+              </span>
+              <div>Cadastrar ponto de coleta</div>
+            </Link>
+          </div>
 
-                <main>
-                    <div id="infs">
-                        <h1>Sua plataforma de coleta de resíduos</h1>
-                        <p>Ajudamos as pessoas a encontrarem pontos de coleta de forma eficiente.</p>
-
-                        <Link to="/create-point">
-                            <span>
-                                <FiLogIn />
-                            </span>
-                            <div>
-                                Cadastrar ponto de coleta
-                            </div>
-                        </Link>
-                    </div>
-        
-                    <div id="background">
-                        <img src={ ecoletaBackground } alt="Duas pessoas reciclando."/>
-                    </div>
-                </main>
-            </div>
-        </div>
-        
-    );
-
-}
+          <div id="background">
+            <img src={ecoletaBackground} alt="Duas pessoas reciclando." />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
 
 export default Home;

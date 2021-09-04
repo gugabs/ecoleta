@@ -6,50 +6,44 @@ import "./style.css";
 import { FiUpload } from "react-icons/fi";
 
 interface Props {
-    onImageUpload: (file: File) => void;
+  onImageUpload: (file: File) => void;
 }
 
 const Dropzone: React.FC<Props> = ({ onImageUpload }) => {
+  const [selectedImageUrl, setSelectedImageUrl] = useState("");
 
-    const [selectedImageUrl, setSelectedImageUrl] = useState("");
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      const image = acceptedFiles[0];
 
-    const onDrop = useCallback(acceptedFiles => {
+      const imageUrl = URL.createObjectURL(image);
 
-        const image = acceptedFiles[0];
+      setSelectedImageUrl(imageUrl);
+      onImageUpload(image);
+    },
+    [onImageUpload]
+  );
 
-        const imageUrl = URL.createObjectURL(image);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: "image/*",
+  });
 
-        setSelectedImageUrl(imageUrl);
-        onImageUpload(image);
-
-    }, [onImageUpload]);
-
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({
-        onDrop,
-        accept: "image/*"
-    });
-
-    return (
-
-        <div className="dropzone" { ...getRootProps() }>
-            <input { ...getInputProps() } accept="image/*" />
-            {
-                isDragActive
-                ?
-                    <p>Solte a imagem...</p>
-                :
-                    selectedImageUrl
-                    ?
-                        <img src={ selectedImageUrl } alt="Point Thumbnail" />
-                    :
-                        <p>
-                            <FiUpload />
-                            Arraste uma imagem da entidade aqui ou clique para selecioná-la.
-                        </p>
-            }
-        </div>
-
-    );
-}
+  return (
+    <div className="dropzone" {...getRootProps()}>
+      <input {...getInputProps()} accept="image/*" />
+      {isDragActive ? (
+        <p>Solte a imagem...</p>
+      ) : selectedImageUrl ? (
+        <img src={selectedImageUrl} alt="Point Thumbnail" />
+      ) : (
+        <p>
+          <FiUpload />
+          Arraste uma imagem da entidade aqui ou clique para selecioná-la.
+        </p>
+      )}
+    </div>
+  );
+};
 
 export default Dropzone;

@@ -1,94 +1,76 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import knex from "../database/connection";
 
-class PointsController
-{
-    async create(request: Request, response: Response)
-    {
-        const {
-            name,
-            email,
-            whatsapp,
-            state,
-            city,
-            latitude,
-            longitude,
-            items
-        } = request.body;
-    
-        const trx = await knex.transaction();
-    
-        const insertedId = await trx("points").insert({
-            name,
-            email,
-            whatsapp,
-            state,
-            city,
-            latitude,
-            longitude,
-            image: request.file.filename
-        });
-    
-        const point_id = insertedId[0];
-    
-        const itemsOfPoint = items
-            .split(',')
-            .map((item: string) => Number(item.trim()))
-            .map((item_id: number) => {
+class PointsController {
+  async create(request: Request, response: Response) {
+    const { name, email, whatsapp, state, city, latitude, longitude, items } =
+      request.body;
 
-                return {
+    const trx = await knex.transaction();
 
-                    point_id,
-                    item_id
+    const insertedId = await trx("points").insert({
+      name,
+      email,
+      whatsapp,
+      state,
+      city,
+      latitude,
+      longitude,
+      image: request.file.filename,
+    });
 
-                }
+    const point_id = insertedId[0];
 
-        });
-    
-        await trx("points_items").insert(itemsOfPoint);
-    
-        await trx.commit();
+    const itemsOfPoint = items
+      .split(",")
+      .map((item: string) => Number(item.trim()))
+      .map((item_id: number) => {
+        return {
+          point_id,
+          item_id,
+        };
+      });
 
-        return response.json({ success: true });
-    }
+    await trx("points_items").insert(itemsOfPoint);
 
-    async show(request: Request, response: Response)
-    {
-        const {
-            id
-        } = request.params;
+    await trx.commit();
 
-        const point = await knex("points").where("id", id).first();
+    return response.json({ success: true });
+  }
 
-        if(!point)
-            return response.status(400).json({ message: "Point not found." });
+  async show(request: Request, response: Response) {
+    const { id } = request.params;
 
-        const items = await knex("items")
-            .join("points_items", "items.id", "=", "points_items.item_id")
-            .where("points_items.point_id", id)
-            .select("items.title");
+    const point = await knex("points").where("id", id).first();
 
-        return response.json({ point, items });
-    }
+    if (!point)
+      return response.status(400).json({ message: "Point not found." });
 
-    async index(request: Request, response: Response)
-    {
-        const { state, city, items } = request.query;
+    const items = await knex("items")
+      .join("points_items", "items.id", "=", "points_items.item_id")
+      .where("points_items.point_id", id)
+      .select("items.title");
 
-        const parsedItems = String(items)
-            .split(',')
-            .map(item => Number(item.trim()));
+    return response.json({ point, items });
+  }
 
-        const points = await knex("points")
-            .join("points_items", "points.id", "=", "points_items.point_id")
-            .whereIn("points_items.item_id", parsedItems)
-            .where("state", String(state))
-            .where("city", String(city))
-            .distinct()
-            .select("points.*")
+  async index(request: Request, response: Response) {
+    const { state, city, items } = request.query;
 
-        return response.json(points);
-    }
+    const parsedItems = String(items)
+      .split(",")
+      .map((item) => Number(item.trim()));
+
+    const points = await knex("points")
+      .join("points_items", "points.id", "=", "points_items.point_id")
+      .whereIn("points_items.item_id", parsedItems)
+      .where("state", String(state))
+      .where("city", String(city))
+      .distinct()
+      .select("points.*");
+
+    return response.json(points);
+  }
 }
 
 export default PointsController;

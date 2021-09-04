@@ -1,107 +1,92 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap, MapConsumer } from "react-leaflet";
-import { NumericLiteral } from "typescript";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+  MapConsumer,
+} from "react-leaflet";
 
-import "./style.css";
-
-interface Props 
-{
-    coords: {
-        lat: number;
-        lng: number;
-    }
+interface Props {
+  coords: {
+    lat: number;
+    lng: number;
+  };
 }
 
 const UserLocation = () => {
+  const [locationFound, setLocationFound] = useState(false);
 
-    const [locationFound, setLocationFound] = useState(false);
+  const map = useMap();
 
-    const map = useMap();
+  map.locate();
 
-    map.locate();
+  useMapEvents({
+    locationfound(e) {
+      if (!locationFound) {
+        map.flyTo(e.latlng, 12);
 
-    useMapEvents({
-        locationfound(e) {
+        setLocationFound(true);
+      }
+    },
+  });
 
-            if(!locationFound)
-            {
-                map.flyTo(e.latlng, 12);
-
-                setLocationFound(true);
-            }
-
-        }
-    });
-
-    return null;
-
-}
+  return null;
+};
 
 interface SelectedLocation {
-
-    onLocationSelect: (location: Props) => void;
-
+  onLocationSelect: (location: Props) => void;
 }
 
 const Leaflet: React.FC<SelectedLocation> = ({ onLocationSelect }) => {
+  const [markerLocation, setMarkerLocation] = useState<Props>({
+    coords: { lat: 0, lng: 0 },
+  });
 
-    const [markerLocation, setMarkerLocation] = useState<Props>({ coords: { lat: 0, lng: 0 } });
+  useEffect(() => {
+    onLocationSelect(markerLocation);
+  }, [markerLocation.coords.lat, markerLocation.coords.lng]);
 
-    useEffect(() => {
+  return (
+    <MapContainer center={[0, 0]} zoom={12}>
+      <TileLayer
+        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-        onLocationSelect(markerLocation);
+      <UserLocation />
 
-    }, [markerLocation.coords.lat, markerLocation.coords.lng])
+      <MapConsumer>
+        {function MarkerLocation() {
+          const map = useMapEvents({
+            click(e) {
+              const newMarkerLocation = {
+                coords: {
+                  lat: e.latlng.lat,
+                  lng: e.latlng.lng,
+                },
+              };
 
-    return(
+              setMarkerLocation(newMarkerLocation);
 
-        <MapContainer center={ [0, 0] } zoom={ 12 }>
-            <TileLayer 
-                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              map.flyTo(
+                [newMarkerLocation.coords.lat, newMarkerLocation.coords.lng],
+                12
+              );
+            },
+          });
+
+          return markerLocation == null ? null : (
+            <Marker
+              position={[markerLocation.coords.lat, markerLocation.coords.lng]}
             />
-
-            <UserLocation />
-
-            <MapConsumer>
-                {
-                    function MarkerLocation()
-                    {
-
-                        const map = useMapEvents({
-
-                            click(e) {
-
-                                const newMarkerLocation = {
-                                    coords: {
-                                        lat: e.latlng.lat,
-                                        lng: e.latlng.lng
-                                    }
-                                }
-                    
-                                setMarkerLocation(newMarkerLocation);
-                    
-                                map.flyTo([newMarkerLocation.coords.lat, newMarkerLocation.coords.lng], 12);                                
-
-                            }
-
-                        });
-
-                        return markerLocation == null ? null :
-                        (
-                    
-                            <Marker position={ [markerLocation.coords.lat, markerLocation.coords.lng] } />
-                    
-                        );
-
-                    }
-                }
-            </MapConsumer>
-        </MapContainer>
-
-    );
-
-}
+          );
+        }}
+      </MapConsumer>
+    </MapContainer>
+  );
+};
 
 export default Leaflet;
